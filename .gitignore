@@ -1,0 +1,14 @@
+# dependencies
+/node_modules
+
+# misc
+.DS_Store
+npm-debug.log*
+
+/coverage
+.idea
+package-lock.json
+*bak
+
+# visual studio code
+.history

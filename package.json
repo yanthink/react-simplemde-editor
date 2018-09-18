@@ -1,0 +1,41 @@
+{
+  "name": "yt-simplemde-editor",
+  "version": "1.0.1",
+  "description": "React SimpleMDE Markdown Editor",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yanthink/react-simplemde-editor.git"
+  },
+  "keywords": [
+    "react",
+    "simplemde-editor",
+    "markdown"
+  ],
+  "author": "yanthink",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "css-loader": "^1.0.0",
+    "less": "^3.8.1",
+    "less-loader": "^4.1.0",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.19.0",
+    "webpack-cli": "^3.1.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "react": "^16.5.1",
+    "react-dom": "^16.5.1",
+    "simplemde": "^1.11.2"
+  }
+}
