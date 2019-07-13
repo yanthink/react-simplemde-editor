@@ -44,6 +44,16 @@ class App extends PureComponent {
     return html;
   };
 
+  componentDidMount () {
+    setTimeout(() => {
+      this.setState({ value: '222' })
+    }, 1000);
+
+    setTimeout(() => {
+      this.setState({ value: '2222222' })
+    }, 10000);
+  }
+
   render () {
     const editorProps = {
       value: this.state.value,
@@ -51,17 +61,18 @@ class App extends PureComponent {
         this.simplemde = simplemde;
       },
       onChange: (value) => {
+        console.info(value);
         this.setState({ value })
       },
       options: {
         // see https://github.com/sparksuite/simplemde-markdown-editor#configuration
         spellChecker: false,
         forceSync: true,
-        autosave: {
-          enabled: true,
-          delay: 5000,
-          uniqueId: 'article_content',
-        },
+        // autosave: {
+        //   enabled: true,
+        //   delay: 5000,
+        //   uniqueId: 'article_content',
+        // },
         renderingConfig: {
           // codeSyntaxHighlighting: true,
         },
@@ -105,7 +116,7 @@ class App extends PureComponent {
       uploadOptions: {
         uploadUrl: '/api/attachment/upload',
         jsonFieldName: 'data.filename',
-        extraHeaders: {
+        headers: {
           Accept: 'application/x.sheng.v1+json',
           'X-XSRF-TOKEN': cookie.parse(document.cookie)['XSRF-TOKEN'],
         },
