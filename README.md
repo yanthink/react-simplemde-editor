@@ -62,6 +62,16 @@ class App extends PureComponent {
     return html;
   };
 
+  componentDidMount () {
+    setTimeout(() => {
+      this.setState({ value: '222' })
+    }, 1000);
+
+    setTimeout(() => {
+      this.setState({ value: '2222222' })
+    }, 10000);
+  }
+
   render () {
     const editorProps = {
       value: this.state.value,
@@ -69,17 +79,18 @@ class App extends PureComponent {
         this.simplemde = simplemde;
       },
       onChange: (value) => {
+        console.info(value);
         this.setState({ value })
       },
       options: {
         // see https://github.com/sparksuite/simplemde-markdown-editor#configuration
         spellChecker: false,
         forceSync: true,
-        autosave: {
-          enabled: true,
-          delay: 5000,
-          uniqueId: 'article_content',
-        },
+        // autosave: {
+        //   enabled: true,
+        //   delay: 5000,
+        //   uniqueId: 'article_content',
+        // },
         renderingConfig: {
           // codeSyntaxHighlighting: true,
         },
@@ -121,11 +132,14 @@ class App extends PureComponent {
         ],
       },
       uploadOptions: {
-        uploadUrl: '/api/attachment/upload',
-        jsonFieldName: 'data.filename',
-        extraHeaders: {
-          Accept: 'application/x.sheng.v1+json',
+        action: '/api/attachment/upload',
+        jsonName: 'data.fileUrl',
+        headers: {
+          Accept: 'application/x.sheng.v2+json',
           'X-XSRF-TOKEN': cookie.parse(document.cookie)['XSRF-TOKEN'],
+        },
+        onError (err, ret, file) {
+          console.info({ err, ret, file })
         },
       },
     };
@@ -142,6 +156,49 @@ export default App;
 ```
 
 
-### Options
+### Demo
 
-设置其他 [SimpleMDE选项](https://github.com/sparksuite/simplemde-markdown-editor#configuration)
+```
+git clone https://github.com/yanthink/react-simplemde-editor
+cd react-simplemde-editor
+npm install
+npm run build
+npm link
+
+cd demo
+npm install
+npm link react-simplemde-editor
+npm start
+```
+
+### API
+
+| 参数 | 说明 | 类型 | 默认值	 |
+| --- | --- | --- | --- |
+| id | 编辑器id | string |  - |
+| className | 根元素的类名称 | string | - |
+| label | label | string | - |
+| uploadOptions | 上传附件参数 | [UploadOptions](#UploadOptions) | - |
+| theme | 主题设置 | string | - |
+| getMdeInstance | 获取编辑器实例方法 | simplemde => void | - |
+| getLineAndCursor | 获取光标对象 | cursor => void | - |
+| extraKeys | 快捷键设置，详见 [extraKeys](https://codemirror.net/doc/manual.html#option_extraKeys) | object | - |
+| value | 初始化内容 | string | - |
+| onChange | 内容发生改变时触发 | value => void | - |
+| options | [SimpleMDE选项](https://github.com/sparksuite/simplemde-markdown-editor#configuration) | object | - |
+
+
+### UploadOptions
+| 参数 | 说明 | 类型 | 默认值	 |
+| --- | --- | --- | --- |
+| action | 上传的地址 | string | 无 |
+| name | 发到后台的文件参数名 | string | file |
+| jsonName | 后台响应的文件地址名称 | string | fileUrl |
+| allowedTypes | 接受上传的文件类型 | string &#x7C; array | image/* |
+| progressText | 上传中显示内容 | string | &#x21;&#x5B;Uploading file...&#x5D;() |
+| data | 上传所需参数 | object &#x7C; file => object | - |
+| headers | 设置上传的请求头部 | object | - |
+| withCredentials | 上传请求时是否携带 cookie | boolean | false |
+| beforeUpload | 上传文件之前的钩子，参数为上传的文件，若返回 false 则停止上传 | (xhr: XMLHttpRequest) => boolean | - |
+| onSuccess | 上传成功事件 | (response, file) => any | - |
+| onError | 上传失败事件 | (err, response, file) => any | - |

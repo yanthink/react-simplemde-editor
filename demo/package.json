@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "cookie": "^0.3.1",
-    "marked": "^0.5.0",
+    "marked": "^0.7.0",
     "prismjs": "~1.14.0",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",
@@ -16,5 +16,5 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "proxy":"http://api.blog.test"
+  "proxy": "http://api.blog.test"
 }

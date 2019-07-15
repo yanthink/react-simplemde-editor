@@ -114,11 +114,14 @@ class App extends PureComponent {
         ],
       },
       uploadOptions: {
-        uploadUrl: '/api/attachment/upload',
-        jsonFieldName: 'data.filename',
+        action: '/api/attachment/upload',
+        jsonName: 'data.fileUrl',
         headers: {
-          Accept: 'application/x.sheng.v1+json',
+          Accept: 'application/x.sheng.v2+json',
           'X-XSRF-TOKEN': cookie.parse(document.cookie)['XSRF-TOKEN'],
+        },
+        onError (err, ret, file) {
+          console.info({ err, ret, file })
         },
       },
     };

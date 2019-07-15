@@ -1,7 +1,7 @@
 import React from 'react';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
-import InlineAttachment, { Options as UploadOptions } from './plugins/InlineAttachment';
+import Upload, { Options as UploadOptions } from './plugins/Upload';
 import './style.less';
 export interface SimpleMDEEditorProps {
     id?: 'string';
@@ -24,12 +24,12 @@ declare class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, Simp
     id: string;
     wrapperId: string;
     simplemde?: SimpleMDE;
-    inlineAttachment?: InlineAttachment;
+    upload?: Upload;
     constructor(props: SimpleMDEEditorProps);
     componentDidMount(): void;
     componentWillReceiveProps(nextProps: SimpleMDEEditorProps): void;
     componentWillUnmount(): void;
-    handleChange: (instance: CodeMirror.Doc, changeObj: CodeMirror.EditorChange) => void;
+    handleChange: (instance: any, changeObj: CodeMirror.EditorChange) => void;
     getCursor: () => void;
     getMdeInstance: () => void;
     addExtraKeys: () => void;

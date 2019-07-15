@@ -1,7 +1,7 @@
 import React from 'react';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
-import InlineAttachment, {Options as UploadOptions} from './plugins/InlineAttachment';
+import Upload, {Options as UploadOptions} from './plugins/Upload';
 import './style.less';
 
 export interface SimpleMDEEditorProps {
@@ -33,7 +33,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   simplemde?: SimpleMDE;
 
-  inlineAttachment?: InlineAttachment;
+  upload?: Upload;
 
   constructor(props: SimpleMDEEditorProps) {
     super(props);
@@ -43,13 +43,14 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   componentDidMount() {
     if (typeof window !== 'undefined') {
-      const simplemde = this.simplemde = this.createEditor();
+      this.simplemde = this.createEditor();
+
       const {uploadOptions} = this.props;
 
       this.addEvents();
 
       if (uploadOptions) {
-        this.inlineAttachment = new InlineAttachment(simplemde.codemirror, uploadOptions);
+        this.upload = new Upload(this.simplemde.codemirror, uploadOptions);
       }
 
       this.addExtraKeys();
@@ -72,7 +73,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     this.removeEvents();
   }
 
-  handleChange = (instance: CodeMirror.Doc, changeObj: CodeMirror.EditorChange) => {
+  handleChange = (instance: any, changeObj: CodeMirror.EditorChange) => {
     if (this.simplemde) {
       const {onChange} = this.props;
       this.setState({contentChanged: true});
@@ -107,9 +108,9 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   removeEvents = () => {
     if (this.simplemde) {
       const {codemirror} = this.simplemde;
-      codemirror.on('change', this.handleChange);
-      codemirror.on('cursorActivity', this.getCursor);
-      this.inlineAttachment && this.inlineAttachment.removeEvents();
+      codemirror.off('change', this.handleChange);
+      codemirror.off('cursorActivity', this.getCursor);
+      this.upload && this.upload.removeEvents();
     }
   };
 
