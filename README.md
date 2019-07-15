@@ -20,7 +20,7 @@ import React, { PureComponent } from 'react';
 import cookie from 'cookie';
 import SimpleMDEEditor from 'yt-simplemde-editor';
 import marked from 'marked';
-import Prism from 'prismjs'; // 这里使用 ~1.14.0 版本，1.15 之后的版本有bug
+import Prism from 'prismjs'; // 这里使用 ~1.14.0 版本，1.15 之后的版本可以配合webpack使用babel-plugin-prismjs插件
 import 'prismjs/themes/prism-okaidia.css';
 import loadLanguages from 'prismjs/components/index';
 
@@ -134,8 +134,10 @@ class App extends PureComponent {
       uploadOptions: {
         action: '/api/attachment/upload',
         jsonName: 'data.fileUrl',
+        withCredentials: true,
         headers: {
           Accept: 'application/x.sheng.v2+json',
+          authorization: 'authorization-text',
           'X-XSRF-TOKEN': cookie.parse(document.cookie)['XSRF-TOKEN'],
         },
         onError (err, ret, file) {
