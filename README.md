@@ -135,6 +135,13 @@ class App extends PureComponent {
         action: '/api/attachment/upload',
         jsonName: 'data.fileUrl',
         withCredentials: true,
+        beforeUpload(file) {
+          const isLt2M = file.size / 1024 / 1024 < 2;
+          if (!isLt2M) {
+            alert('Image must smaller than 2MB!');
+          }
+          return isLt2M;
+        },
         headers: {
           Accept: 'application/x.sheng.v2+json',
           authorization: 'authorization-text',
@@ -157,6 +164,39 @@ class App extends PureComponent {
 export default App;
 ```
 
+```php
+<?php
+
+namespace App\Http\Controllers\V2;
+
+use Illuminate\Http\Request;
+use Storage;
+
+class AttachmentController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('api.auth');
+    }
+
+    public function upload(Request $request)
+    {
+        $rules = [
+            'file' => 'required|image|mimes:png,jpg,jpeg,gif|max:2048',
+        ];
+
+        $this->validate($request, $rules);
+
+        $disk = Storage::disk('public');
+        $path = $disk->putFile('tmp', $request->file('file'));
+
+        $data = [
+            'fileUrl' => $disk->url($path),
+        ];
+        return compact('data');
+    }
+}
+```
 
 ### Demo
 

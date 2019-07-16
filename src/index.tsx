@@ -22,6 +22,8 @@ export interface SimpleMDEEditorState {
   contentChanged: boolean,
 }
 
+export type TSimpleMDE = SimpleMDE & { autosaveTimeoutId: number };
+
 class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
   static defaultProps = {
     value: '',
@@ -37,7 +39,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   wrapperId: string = '';
 
-  simplemde?: SimpleMDE;
+  simplemde?: TSimpleMDE;
 
   upload?: Upload;
 
@@ -120,6 +122,10 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
       codemirror.off('change', this.handleChange);
       codemirror.off('cursorActivity', this.getCursor);
       this.upload && this.upload.removeEvents();
+
+      if (this.simplemde.autosaveTimeoutId) {
+        clearTimeout(this.simplemde.autosaveTimeoutId);
+      }
     }
   };
 
@@ -131,7 +137,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     }
   };
 
-  createEditor = (): SimpleMDE => {
+  createEditor = (): TSimpleMDE => {
     const {value, options, theme} = this.props;
 
     const simpleMdeOptions = ({
@@ -146,7 +152,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
       simplemde.codemirror.setOption('theme', theme);
     }
 
-    return simplemde;
+    return simplemde as TSimpleMDE;
   };
 
   render() {

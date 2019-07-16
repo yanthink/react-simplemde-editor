@@ -117,6 +117,13 @@ class App extends PureComponent {
         action: '/api/attachment/upload',
         jsonName: 'data.fileUrl',
         withCredentials: true,
+        beforeUpload(file) {
+          const isLt2M = file.size / 1024 / 1024 < 2;
+          if (!isLt2M) {
+            alert('Image must smaller than 2MB!');
+          }
+          return isLt2M;
+        },
         headers: {
           Accept: 'application/x.sheng.v2+json',
           authorization: 'authorization-text',

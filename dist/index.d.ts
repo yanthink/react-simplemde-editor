@@ -19,6 +19,9 @@ export interface SimpleMDEEditorProps {
 export interface SimpleMDEEditorState {
     contentChanged: boolean;
 }
+export declare type TSimpleMDE = SimpleMDE & {
+    autosaveTimeoutId: number;
+};
 declare class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
     static defaultProps: {
         value: string;
@@ -27,7 +30,7 @@ declare class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, Simp
     state: SimpleMDEEditorState;
     id: string;
     wrapperId: string;
-    simplemde?: SimpleMDE;
+    simplemde?: TSimpleMDE;
     upload?: Upload;
     constructor(props: SimpleMDEEditorProps);
     componentDidMount(): void;
@@ -39,7 +42,7 @@ declare class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, Simp
     addExtraKeys: () => void;
     removeEvents: () => void;
     addEvents: () => void;
-    createEditor: () => SimpleMDE;
+    createEditor: () => TSimpleMDE;
     render(): JSX.Element;
 }
 export default SimpleMDEEditor;
