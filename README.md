@@ -201,6 +201,6 @@ npm start
 | data | 上传所需参数 | object &#x7C; file => object | - |
 | headers | 设置上传的请求头部 | object | - |
 | withCredentials | 上传请求时是否携带 cookie | boolean | false |
-| beforeUpload | 上传文件之前的钩子，参数为上传的文件，若返回 false 则停止上传 | (xhr: XMLHttpRequest) => boolean | - |
+| beforeUpload | 上传文件之前的钩子，参数为上传的文件，若返回 false 则停止上传 | (file) => boolean &#x7C; Promise | - |
 | onSuccess | 上传成功事件 | (response, file) => any | - |
 | onError | 上传失败事件 | (err, response, file) => any | - |
