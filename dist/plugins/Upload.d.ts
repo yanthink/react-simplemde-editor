@@ -18,11 +18,11 @@ export interface Options {
     /**
      * Allowed MIME types
      */
-    allowedTypes?: string[];
+    allowedTypes?: string | string[];
     /**
      * 上传中显示内容
      */
-    progressText?: string | ((file: File) => string);
+    progressText?: string;
     /**
      * 上传所需参数
      */

@@ -13,9 +13,9 @@ export interface SimpleMDEEditorProps {
   getMdeInstance?: (simplemde: SimpleMDE) => void;
   getLineAndCursor?: (cursor: CodeMirror.Position) => void;
   extraKeys?: CodeMirror.KeyMap;
-  value: string;
-  onChange: (value: string) => void;
-  options: SimpleMDE.Options,
+  value?: string;
+  onChange?: (value: string) => void;
+  options?: SimpleMDE.Options,
 }
 
 export interface SimpleMDEEditorState {
@@ -23,6 +23,12 @@ export interface SimpleMDEEditorState {
 }
 
 class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
+  static defaultProps = {
+    value: '',
+    onChange: () => {
+    },
+  };
+
   state: SimpleMDEEditorState = {
     contentChanged: false,
   };
@@ -62,8 +68,9 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   componentWillReceiveProps(nextProps: SimpleMDEEditorProps) {
     if (this.simplemde) {
       const {contentChanged} = this.state;
-      if (!contentChanged && nextProps.value !== this.simplemde.value()) {
-        this.simplemde.value(nextProps.value);
+      const {value = ''} = nextProps;
+      if (!contentChanged && value !== this.simplemde.value()) {
+        this.simplemde.value(value);
       }
       this.setState({contentChanged: false});
     }
@@ -77,7 +84,9 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     if (this.simplemde) {
       const {onChange} = this.props;
       this.setState({contentChanged: true});
-      onChange(this.simplemde.value());
+      if (onChange) {
+        onChange(this.simplemde.value());
+      }
     }
   };
 

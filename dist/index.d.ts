@@ -12,14 +12,18 @@ export interface SimpleMDEEditorProps {
     getMdeInstance?: (simplemde: SimpleMDE) => void;
     getLineAndCursor?: (cursor: CodeMirror.Position) => void;
     extraKeys?: CodeMirror.KeyMap;
-    value: string;
-    onChange: (value: string) => void;
-    options: SimpleMDE.Options;
+    value?: string;
+    onChange?: (value: string) => void;
+    options?: SimpleMDE.Options;
 }
 export interface SimpleMDEEditorState {
     contentChanged: boolean;
 }
 declare class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
+    static defaultProps: {
+        value: string;
+        onChange: () => void;
+    };
     state: SimpleMDEEditorState;
     id: string;
     wrapperId: string;
