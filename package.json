@@ -1,6 +1,6 @@
 {
   "name": "yt-simplemde-editor",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "React SimpleMDE Markdown Editor",
   "main": "dist/index.js",
   "scripts": {
