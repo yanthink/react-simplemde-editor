@@ -1,5 +1,7 @@
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
   // 设置 sourcemaps 为 eval 模式，将模块封装到 eval 包裹起来
@@ -26,7 +28,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: ['babel-loader', 'ts-loader'],
-        include: path.resolve('src'),
+        exclude: /node_modules/,
       },
       {
         test: /\.js$/,
@@ -35,28 +37,26 @@ module.exports = {
       },
       {
         test: /\.less$/,
-        exclude: [/node_modules/],
         use: [
-          require.resolve('style-loader'),
+          MiniCssExtractPlugin.loader,
           {
-            loader: require.resolve('css-loader'),
+            loader: 'css-loader',
             options: {
               modules: {
                 localIdentName: '[name]__[local]___[hash:base64:5]',
               },
             },
           },
-          {
-            loader: require.resolve('less-loader'), // compiles Less to CSS
-          },
+          'less-loader',
         ],
+        exclude: [/node_modules/],
       },
       {
         test: /\.css$/,
         use: [
-          require.resolve('style-loader'),
+          MiniCssExtractPlugin.loader,
           {
-            loader: require.resolve('css-loader'),
+            loader: 'css-loader',
             options: {
               modules: {
                 localIdentName: '[name]__[local]___[hash:base64:5]',
@@ -64,8 +64,17 @@ module.exports = {
             },
           },
         ],
+        exclude: [/node_modules/],
       },
     ]
   },
   externals: [nodeExternals()],
+  optimization: {
+    minimizer: [new OptimizeCSSAssetsPlugin({})],
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'style.css',
+    }),
+  ],
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
 import Upload, {Options as UploadOptions} from './plugins/Upload';
+import 'simplemde/dist/simplemde.min.css';
 import './style.less';
 
 export interface SimpleMDEEditorProps {
@@ -10,8 +11,7 @@ export interface SimpleMDEEditorProps {
   label?: 'string;'
   uploadOptions?: UploadOptions;
   theme?: string;
-  getMdeInstance?: (simplemde: SimpleMDE) => void;
-  getLineAndCursor?: (cursor: CodeMirror.Position) => void;
+  getMdeInstance?: (simplemde: TSimpleMDE) => void;
   extraKeys?: CodeMirror.KeyMap;
   value?: string;
   onChange?: (value: string) => void;
@@ -22,11 +22,13 @@ export interface SimpleMDEEditorState {
   contentChanged: boolean,
 }
 
-export type TSimpleMDE = SimpleMDE & { autosaveTimeoutId: number };
+export type TSimpleMDE = SimpleMDE & {
+  toggleFullScreen: () => void,
+  autosaveTimeoutId: number,
+};
 
 class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
   static defaultProps = {
-    value: '',
     onChange: () => {
     },
   };
@@ -62,7 +64,6 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
       }
 
       this.addExtraKeys();
-      this.getCursor();
       this.getMdeInstance();
     }
   }
@@ -80,24 +81,31 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   componentWillUnmount() {
     this.removeEvents();
+
+    if (this.simplemde) {
+      /**
+       * 如果不关闭全屏状态会导致页面无法滚动
+       */
+      if (this.simplemde.isFullscreenActive()) {
+        this.simplemde.toggleFullScreen();
+      }
+
+      /**
+       * 清除自动保存的定时器
+       */
+      if (this.simplemde.autosaveTimeoutId) {
+        clearTimeout(this.simplemde.autosaveTimeoutId);
+      }
+    }
   }
 
   handleChange = (instance: any, changeObj: CodeMirror.EditorChange) => {
     if (this.simplemde) {
       const {onChange} = this.props;
-      this.setState({contentChanged: true});
       if (onChange) {
+        this.setState({contentChanged: true});
         onChange(this.simplemde.value());
       }
-    }
-  };
-
-  getCursor = () => {
-    // https://codemirror.net/doc/manual.html#api_selection
-    const {getLineAndCursor} = this.props;
-    if (getLineAndCursor && this.simplemde) {
-      const {codemirror} = this.simplemde;
-      getLineAndCursor(codemirror.getCursor());
     }
   };
 
@@ -120,12 +128,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     if (this.simplemde) {
       const {codemirror} = this.simplemde;
       codemirror.off('change', this.handleChange);
-      codemirror.off('cursorActivity', this.getCursor);
       this.upload && this.upload.removeEvents();
-
-      if (this.simplemde.autosaveTimeoutId) {
-        clearTimeout(this.simplemde.autosaveTimeoutId);
-      }
     }
   };
 
@@ -133,12 +136,11 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     if (this.simplemde) {
       const {codemirror} = this.simplemde;
       codemirror.on('change', this.handleChange);
-      codemirror.on('cursorActivity', this.getCursor);
     }
   };
 
   createEditor = (): TSimpleMDE => {
-    const {value, options, theme} = this.props;
+    const {value, options = {}, theme, onChange} = this.props;
 
     const simpleMdeOptions = ({
       ...options,
@@ -150,6 +152,18 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
     if (theme) {
       simplemde.codemirror.setOption('theme', theme);
+    }
+
+    // 同步自动保存的value
+    if (onChange) {
+      const {autosave} = options;
+      if (autosave && autosave.enabled === true && autosave.uniqueId) {
+        const autoSaveValue = simplemde.value();
+        if (autoSaveValue && autoSaveValue !== value) {
+          this.setState({contentChanged: true});
+          onChange(autoSaveValue);
+        }
+      }
     }
 
     return simplemde as TSimpleMDE;

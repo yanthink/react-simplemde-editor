@@ -1,12 +1,18 @@
-@import './simplemde';
-@import './markdown';
+@font-size-base: 14px;
+@heading-1-size: ceil(@font-size-base * 2.71);
+@heading-2-size: ceil(@font-size-base * 2.14);
+@heading-3-size: ceil(@font-size-base * 1.71);
+@heading-4-size: ceil(@font-size-base * 1.42);
+
+@code-family: monaco, Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
 :global {
   .CodeMirror {
     pre {
       font-size: 16px;
-      line-height: 30px;
+      line-height: 1.8;
     }
+
     .CodeMirror-code {
       .cm-header-1,
       .cm-header-2,
@@ -25,28 +31,84 @@
   }
 
   .markdown-body,
+  .editor-preview,
+  .editor-preview-active,
   .editor-preview-side,
   .editor-preview-active-side {
-    font-size: 16px;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: unset;
     background: white;
-    padding: 30px;
-    overflow: auto;
+    font-size: 16px;
+    line-height: 1.6;
 
-    :not(pre) > code[class*='language-'],
-    pre[class*='language-'] {
-      background: rgba(54, 56, 58, 0.98);
+    h1, h2, h3, h4 {
+      font-weight: bold;
+    }
+
+    h1 {
+      font-size: @heading-1-size;
+    }
+
+    h2 {
+      font-size: @heading-2-size;
+    }
+
+    h3 {
+      font-size: @heading-3-size;
+    }
+
+    h4 {
+      font-size: @heading-4-size;
+    }
+
+    pre,
+    code,
+    kbd,
+    samp {
+      font-size: 1em; // Correct the odd `em` font sizing in all browsers.
+      font-family: @code-family;
+    }
+
+    pre {
+      // remove browser default top margin
+      margin-top: 0;
+      // Reset browser default of `1em` to use `em`s
+      margin-bottom: 1em;
+      // Don't allow content to break outside
+      overflow: auto;
+      padding: 16px;
+      background: #384548;
+      border-radius: unset;
+
+      > code {
+        padding: 0;
+        margin: 0;
+        font-size: 100%;
+        white-space: pre;
+        background: transparent;
+        border: unset;
+        color: white;
+      }
     }
 
     code {
+      margin: 0;
+      color: #c2627b;
+      background-color: #ecf0f1;
+      border-radius: 4px;
       border: 1px solid #e4e4e4;
-    }
-
-    img:not(.emoji) {
-      margin-left: 0;
-      max-width: 100%;
+      padding: 0 7px;
     }
 
     blockquote {
+      margin: 0 0 1em;
+      color: rgba(0, 0, 0, 0.45);
+      background-color: #e6f7ff;
+      padding: 16px;
+
       > :first-child {
         margin-top: 0;
       }
@@ -56,13 +118,31 @@
       }
     }
 
-    hr {
-      background: none;
-      height: auto;
-      border: 2px dashed #f0f4f6;
-      border-bottom: none;
-      margin: 18px auto;
-      width: 50%;
+    ol,
+    ul,
+    dl {
+      margin-top: 0;
+      margin-bottom: 1em;
+    }
+
+    ol ol,
+    ul ul,
+    ol ul,
+    ul ol {
+      margin-bottom: 0;
+    }
+
+    dt {
+      font-weight: 500;
+    }
+
+    dd {
+      margin-bottom: 0.5em;
+      margin-left: 0;
+    }
+
+    table {
+      border-collapse: collapse;
     }
   }
 }

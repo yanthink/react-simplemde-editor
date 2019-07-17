@@ -1,6 +1,6 @@
 {
   "name": "yt-simplemde-editor",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "React SimpleMDE Markdown Editor",
   "main": "dist/index.js",
   "scripts": {
@@ -32,7 +32,8 @@
     "css-loader": "^3.0.0",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
-    "style-loader": "^0.23.1",
+    "mini-css-extract-plugin": "^0.8.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
     "webpack": "^4.35.3",

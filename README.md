@@ -21,8 +21,9 @@ import cookie from 'cookie';
 import SimpleMDEEditor from 'yt-simplemde-editor';
 import marked from 'marked';
 import Prism from 'prismjs'; // 这里使用 ~1.14.0 版本，1.15 之后的版本可以配合webpack使用babel-plugin-prismjs插件
-import 'prismjs/themes/prism-okaidia.css';
 import loadLanguages from 'prismjs/components/index';
+import 'prismjs/themes/prism-okaidia.css';
+import 'yt-simplemde-editor/dist/style.css';
 
 loadLanguages([
   'css',
@@ -62,16 +63,6 @@ class App extends PureComponent {
     return html;
   };
 
-  componentDidMount () {
-    setTimeout(() => {
-      this.setState({ value: '222' })
-    }, 1000);
-
-    setTimeout(() => {
-      this.setState({ value: '2222222' })
-    }, 10000);
-  }
-
   render () {
     const editorProps = {
       value: this.state.value,
@@ -79,22 +70,18 @@ class App extends PureComponent {
         this.simplemde = simplemde;
       },
       onChange: (value) => {
-        console.info(value);
         this.setState({ value })
       },
+      // 配置文档 https://github.com/sparksuite/simplemde-markdown-editor#configuration
       options: {
-        // see https://github.com/sparksuite/simplemde-markdown-editor#configuration
         spellChecker: false,
         forceSync: true,
-        // autosave: {
-        //   enabled: true,
-        //   delay: 5000,
-        //   uniqueId: 'article_content',
-        // },
-        renderingConfig: {
-          // codeSyntaxHighlighting: true,
+        autosave: {
+          enabled: true,
+          delay: 3000,
+          uniqueId: `article_content`,
         },
-        previewRender: this.renderMarkdown, // 自定义预览渲染
+        previewRender: this.renderMarkdown,
         tabSize: 4,
         toolbar: [
           'bold',
@@ -111,6 +98,7 @@ class App extends PureComponent {
           'link',
           'image',
           '|',
+          'preview',
           'side-by-side',
           'fullscreen',
           '|',
@@ -132,10 +120,10 @@ class App extends PureComponent {
         ],
       },
       uploadOptions: {
-        action: '/api/attachment/upload',
+        action: '/api/attachments/upload',
         jsonName: 'data.fileUrl',
         withCredentials: true,
-        beforeUpload(file) {
+        beforeUpload (file) {
           const isLt2M = file.size / 1024 / 1024 < 2;
           if (!isLt2M) {
             alert('Image must smaller than 2MB!');
@@ -223,7 +211,6 @@ npm start
 | uploadOptions | 上传附件参数 | [UploadOptions](#UploadOptions) | - |
 | theme | 主题设置 | string | - |
 | getMdeInstance | 获取编辑器实例方法 | simplemde => void | - |
-| getLineAndCursor | 获取光标对象 | cursor => void | - |
 | extraKeys | 快捷键设置，详见 [extraKeys](https://codemirror.net/doc/manual.html#option_extraKeys) | object | - |
 | value | 初始化内容 | string | - |
 | onChange | 内容发生改变时触发 | value => void | - |
