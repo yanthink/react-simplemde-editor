@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
 import cookie from 'cookie';
 import SimpleMDEEditor from 'yt-simplemde-editor';
+import emojiToolkit from 'emoji-toolkit';
 import marked from 'marked';
 import Prism from 'prismjs'; // 这里使用 ~1.14.0 版本，1.15 之后的版本可以配合webpack使用babel-plugin-prismjs插件
 import loadLanguages from 'prismjs/components/index';
 import 'prismjs/themes/prism-okaidia.css';
+import 'emoji-assets/sprites/joypixels-sprite-32.min.css';
 import 'yt-simplemde-editor/dist/style.css';
+import './App.css';
 
 loadLanguages([
   'css',
@@ -28,21 +31,23 @@ loadLanguages([
   'yaml',
 ]);
 
+emojiToolkit.sprites = true;
+emojiToolkit.spriteSize = 32;
+
 class App extends PureComponent {
   state = {
     value: '',
   };
 
   renderMarkdown = text => {
-    const html = marked(text, { breaks: true });
+    let html = marked(text, {breaks: true});
     if (/language-/.test(html)) {
       const container = document.createElement('div');
       container.innerHTML = html;
       Prism.highlightAllUnder(container);
-      return container.innerHTML;
+      html = container.innerHTML;
     }
-
-    return html;
+    return emojiToolkit.toImage(html);
   };
 
   render () {
@@ -84,26 +89,22 @@ class App extends PureComponent {
           'side-by-side',
           'fullscreen',
           '|',
+          'guide',
           {
-            name: 'guide',
+            name: 'submit',
             action () {
-              const win = window.open(
-                'https://github.com/riku/Markdown-Syntax-CN/blob/master/syntax.md',
-                '_blank',
-              );
-              if (win) {
-                // Browser has allowed it to be opened
-                win.focus();
-              }
+              //
             },
-            className: 'fa fa-info-circle',
-            title: 'Markdown 语法！',
+            className: 'fa fa-paper-plane',
+            title: '提交',
           },
+          '|',
+          'emoji',
         ],
       },
       uploadOptions: {
         action: '/api/attachments/upload',
-        jsonName: 'data.fileUrl',
+        jsonName: 'data.fileUrl', // 服务端响应格式 {"data":{"fileUrl":"http:\/\/api.blog.test\/storage\/tmp\/w9jfWHWUUuiaeqYAl7K1PhBBRgzamCv20ScdW1mn.png"}}
         withCredentials: true,
         beforeUpload (file) {
           const isLt2M = file.size / 1024 / 1024 < 2;
@@ -121,10 +122,15 @@ class App extends PureComponent {
           console.info({ err, ret, file })
         },
       },
+      emoji: {
+        enabled: true,
+        autoComplete: true,
+        insertConvertTo: 'unicode', // 'shortname' or 'unicode'
+      },
     };
 
     return (
-      <div>
+      <div className="app">
         <SimpleMDEEditor {...editorProps} />
       </div>
     )
