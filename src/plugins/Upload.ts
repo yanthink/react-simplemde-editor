@@ -303,4 +303,8 @@ export default class Upload {
     );
     this.codemirror.on('drop', this.onDrop);
   };
+
+  destroy() {
+    this.removeEvents();
+  }
 }

@@ -1,50 +1,56 @@
-.dropdown-menu img {
-  height: 24px;
-  width: 24px;
-  margin: 5px 10px 5px 2px;
-  vertical-align: middle
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  display: none;
-  float: left;
-  min-width: 160px;
-  margin: 2px 0 0;
+/* emoji-dropdown-menu */
+.emoji-dropdown-menu {
   list-style: none;
-  font-size: 14px;
-  text-align: left;
+  min-width: 160px;
+  margin-top: 4px;
   background-color: #fff;
   border: 1px solid rgba(0, 0, 0, .15);
   border-radius: 4px;
   -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
   box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-  background-clip: padding-box;
-  color: inherit;
   padding: 0;
 }
 
-.dropdown-menu > li > a {
-  color: #777;
+.emoji-dropdown-menu li a {
   display: block;
+  height: 41px;
+  line-height: 24px;
+  padding: 8px 12px;
+  color: #777;
   border-bottom: 1px solid #e6e6e6;
-  line-height: 2.3;
   cursor: pointer;
-  padding-left: 12px
+  box-sizing: border-box;
+  vertical-align: middle;
+  font-size: 14;
 }
 
-.dropdown-menu > li.textcomplete-item.active,
-.dropdown-menu > li > a:focus,
-.dropdown-menu > li > a:hover {
+.emoji-dropdown-menu > li.textcomplete-item.active,
+.emoji-dropdown-menu > li > a:focus,
+.emoji-dropdown-menu > li > a:hover {
   color: #060606;
   background-color: #f5f8fa
 }
 
-.dropdown-menu > li.textcomplete-header,
-.dropdown-menu > li.textcomplete-footer {
+.emoji-dropdown-menu > li.textcomplete-header,
+.emoji-dropdown-menu > li.textcomplete-footer {
   display: none;
+}
+
+.emoji-dropdown-menu li .joypixels {
+  transform-origin: left;
+  transform: scale(0.75, 0.75);
+  float: left;
+}
+
+/* emoji-picker */
+.emoji-dialog .emoji {
+  width: 40px;
+  height: 40px;
+}
+
+.emoji-dialog .emoji .joypixels {
+  transform-origin: left;
+  transform: scale(0.75, 0.75);
+  margin: 0;
 }
 

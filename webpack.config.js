@@ -1,6 +1,7 @@
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 module.exports = {
@@ -54,23 +55,18 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              modules: {
-                localIdentName: '[name]__[local]___[hash:base64:5]',
-              },
-            },
-          },
+          'style-loader',
+          'css-loader',
         ],
-        exclude: [/node_modules/],
       },
     ]
   },
   externals: [nodeExternals()],
   optimization: {
-    minimizer: [new OptimizeCSSAssetsPlugin({})],
+    minimizer: [
+      new UglifyJsPlugin(),
+      new OptimizeCSSAssetsPlugin(),
+    ],
   },
   plugins: [
     new MiniCssExtractPlugin({

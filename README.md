@@ -1,10 +1,17 @@
 ## React SimpleMDE Markdown Editor
 
+### 演示地址
+https://www.einsition.com/demos/yt-simplemde-editor
+
+### 更新日志
+
+[CHANGELOG.md](CHANGELOG.md)
+
 ### 特性
 
 * 支持粘贴和拖拽上传图片。
 * 支持自定义预览渲染
-
+* 支持emoji表情
 
 ### 安装
 
@@ -15,176 +22,7 @@ npm install -S yt-simplemde-editor
 
 ### 使用
 
-```javascript
-import React, { PureComponent } from 'react';
-import cookie from 'cookie';
-import SimpleMDEEditor from 'yt-simplemde-editor';
-import marked from 'marked';
-import Prism from 'prismjs'; // 这里使用 ~1.14.0 版本，1.15 之后的版本可以配合webpack使用babel-plugin-prismjs插件
-import loadLanguages from 'prismjs/components/index';
-import 'prismjs/themes/prism-okaidia.css';
-import 'yt-simplemde-editor/dist/style.css';
-
-loadLanguages([
-  'css',
-  'javascript',
-  'bash',
-  'git',
-  'ini',
-  'java',
-  'json',
-  'less',
-  'markdown',
-  'php',
-  'php-extras',
-  'python',
-  'jsx',
-  'tsx',
-  'scss',
-  'sql',
-  'vim',
-  'yaml',
-]);
-
-class App extends PureComponent {
-  state = {
-    value: '',
-  };
-
-  renderMarkdown = text => {
-    const html = marked(text, { breaks: true });
-    if (/language-/.test(html)) {
-      const container = document.createElement('div');
-      container.innerHTML = html;
-      Prism.highlightAllUnder(container);
-      return container.innerHTML;
-    }
-
-    return html;
-  };
-
-  render () {
-    const editorProps = {
-      value: this.state.value,
-      getMdeInstance: simplemde => {
-        this.simplemde = simplemde;
-      },
-      onChange: (value) => {
-        this.setState({ value })
-      },
-      // 配置文档 https://github.com/sparksuite/simplemde-markdown-editor#configuration
-      options: {
-        spellChecker: false,
-        forceSync: true,
-        autosave: {
-          enabled: true,
-          delay: 3000,
-          uniqueId: `article_content`,
-        },
-        previewRender: this.renderMarkdown,
-        tabSize: 4,
-        toolbar: [
-          'bold',
-          'italic',
-          'heading',
-          '|',
-          'quote',
-          'code',
-          'table',
-          'horizontal-rule',
-          'unordered-list',
-          'ordered-list',
-          '|',
-          'link',
-          'image',
-          '|',
-          'preview',
-          'side-by-side',
-          'fullscreen',
-          '|',
-          {
-            name: 'guide',
-            action () {
-              const win = window.open(
-                'https://github.com/riku/Markdown-Syntax-CN/blob/master/syntax.md',
-                '_blank',
-              );
-              if (win) {
-                // Browser has allowed it to be opened
-                win.focus();
-              }
-            },
-            className: 'fa fa-info-circle',
-            title: 'Markdown 语法！',
-          },
-        ],
-      },
-      uploadOptions: {
-        action: '/api/attachments/upload',
-        jsonName: 'data.fileUrl',
-        withCredentials: true,
-        beforeUpload (file) {
-          const isLt2M = file.size / 1024 / 1024 < 2;
-          if (!isLt2M) {
-            alert('Image must smaller than 2MB!');
-          }
-          return isLt2M;
-        },
-        headers: {
-          Accept: 'application/x.sheng.v2+json',
-          authorization: 'authorization-text',
-          'X-XSRF-TOKEN': cookie.parse(document.cookie)['XSRF-TOKEN'],
-        },
-        onError (err, ret, file) {
-          console.info({ err, ret, file })
-        },
-      },
-    };
-
-    return (
-      <div>
-        <SimpleMDEEditor {...editorProps} />
-      </div>
-    )
-  }
-}
-
-export default App;
-```
-
-```php
-<?php
-
-namespace App\Http\Controllers\V2;
-
-use Illuminate\Http\Request;
-use Storage;
-
-class AttachmentController extends Controller
-{
-    public function __construct()
-    {
-        $this->middleware('api.auth');
-    }
-
-    public function upload(Request $request)
-    {
-        $rules = [
-            'file' => 'required|image|mimes:png,jpg,jpeg,gif|max:2048',
-        ];
-
-        $this->validate($request, $rules);
-
-        $disk = Storage::disk('public');
-        $path = $disk->putFile('tmp', $request->file('file'));
-
-        $data = [
-            'fileUrl' => $disk->url($path),
-        ];
-        return compact('data');
-    }
-}
-```
+您可以在 [demo](demo/src/App.js) 中查看基本用法。
 
 ### Demo
 
@@ -197,7 +35,7 @@ npm link
 
 cd demo
 npm install
-npm link react-simplemde-editor
+npm link yt-simplemde-editor
 npm start
 ```
 
@@ -215,6 +53,7 @@ npm start
 | value | 初始化内容 | string | - |
 | onChange | 内容发生改变时触发 | value => void | - |
 | options | [SimpleMDE选项](https://github.com/sparksuite/simplemde-markdown-editor#configuration) | object | - |
+| emoji | emoji参数 | [Emoji](#Emoji) | - |
 
 
 ### UploadOptions
@@ -231,3 +70,12 @@ npm start
 | beforeUpload | 上传文件之前的钩子，参数为上传的文件，若返回 false 则停止上传 | (file) => boolean &#x7C; Promise | - |
 | onSuccess | 上传成功事件 | (response, file) => any | - |
 | onError | 上传失败事件 | (err, response, file) => any | - |
+
+
+### Emoji
+| 参数 | 说明 | 类型 | 默认值	 |
+| --- | --- | --- | --- |
+| enabled | 是否开启 | boolean | false |
+| autoComplete | 是否开启 shortname 自动补全 | boolean | false |
+| insertConvertTo | 插值转换，可选值 `shortname`，`unicode` | string | shortname |
+

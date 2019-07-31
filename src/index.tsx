@@ -1,16 +1,35 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
+// @ts-ignore
+import {Textcomplete} from 'textcomplete';
+// @ts-ignore
+import CodemirrorEditor from 'textcomplete.codemirror';
+// @ts-ignore
+import EmojiPicker from 'yt-emoji-picker';
+// @ts-ignore
+import emojiToolkit from 'emoji-toolkit';
+// @ts-ignore
+import strategy from 'emoji-toolkit/emoji.json';
 import Upload, {Options as UploadOptions} from './plugins/Upload';
+import {createShortnamesFromStrategy, getPositions, isParentElement} from "./uitls";
 import 'simplemde/dist/simplemde.min.css';
+import 'yt-emoji-picker/dist/style.css';
+import 'emoji-assets/sprites/joypixels-sprite-32.min.css';
+import './emoji.css';
 import './style.less';
 
 export interface SimpleMDEEditorProps {
-  id?: 'string';
-  className?: 'string';
-  label?: 'string;'
+  id?: string;
+  className?: string;
+  label?: string;
+  emoji?: {
+    enabled: boolean;
+    autoComplete: boolean;
+    insertConvertTo: string;
+  };
   uploadOptions?: UploadOptions;
-  theme?: string;
   getMdeInstance?: (simplemde: TSimpleMDE) => void;
   extraKeys?: CodeMirror.KeyMap;
   value?: string;
@@ -28,11 +47,6 @@ export type TSimpleMDE = SimpleMDE & {
 };
 
 class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEditorState> {
-  static defaultProps = {
-    onChange: () => {
-    },
-  };
-
   state: SimpleMDEEditorState = {
     contentChanged: false,
   };
@@ -45,6 +59,10 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   upload?: Upload;
 
+  textcomplete?: any;
+
+  emojiPickerPopup?: HTMLDivElement;
+
   constructor(props: SimpleMDEEditorProps) {
     super(props);
     this.id = this.props.id || `simplemde-editor-${Date.now()}`;
@@ -54,25 +72,26 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   componentDidMount() {
     if (typeof window !== 'undefined') {
       this.simplemde = this.createEditor();
-
-      const {uploadOptions} = this.props;
-
       this.addEvents();
+      this.addExtraKeys();
+      this.getMdeInstance();
 
+      const {uploadOptions, emoji} = this.props;
       if (uploadOptions) {
         this.upload = new Upload(this.simplemde.codemirror, uploadOptions);
       }
 
-      this.addExtraKeys();
-      this.getMdeInstance();
+      if (emoji && emoji.enabled && emoji.autoComplete) {
+        this.initAutoCompleteEmoji();
+      }
     }
   }
 
   componentWillReceiveProps(nextProps: SimpleMDEEditorProps) {
     if (this.simplemde) {
       const {contentChanged} = this.state;
-      const {value = ''} = nextProps;
-      if (!contentChanged && value !== this.simplemde.value()) {
+      const {value} = nextProps;
+      if (!contentChanged && typeof value !== "undefined" && value !== this.simplemde.value()) {
         this.simplemde.value(value);
       }
       this.setState({contentChanged: false});
@@ -80,7 +99,13 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   }
 
   componentWillUnmount() {
-    this.removeEvents();
+    if (this.upload) {
+      this.upload.destroy();
+    }
+
+    if (this.textcomplete) {
+      this.textcomplete.destroy();
+    }
 
     if (this.simplemde) {
       /**
@@ -97,15 +122,71 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
         clearTimeout(this.simplemde.autosaveTimeoutId);
       }
     }
+
+    if (this.emojiPickerPopup) {
+      document.body.removeEventListener(
+        'click',
+        this.hiddenEmojiPickerPopup,
+        false
+      );
+
+      document.body.removeChild(this.emojiPickerPopup);
+    }
+
+    this.removeEvents();
   }
 
   handleChange = (instance: any, changeObj: CodeMirror.EditorChange) => {
-    if (this.simplemde) {
-      const {onChange} = this.props;
-      if (onChange) {
-        this.setState({contentChanged: true});
-        onChange(this.simplemde.value());
+    this.simplemde && this.triggerChange(this.simplemde.value());
+  };
+
+  handleEmojiSelect = (emoji: any, e: any) => {
+    if (this.simplemde && this.props.emoji) {
+      const value = this.props.emoji.insertConvertTo === 'unicode'
+        ? emojiToolkit.shortnameToUnicode(emoji.shortname)
+        : emoji.shortname;
+
+      this.simplemde.codemirror.replaceSelection(value);
+    }
+  };
+
+  toggleEmojiPickerPopup(emojiBtn: any) {
+    if (this.emojiPickerPopup) {
+      if (this.emojiPickerPopup.style.display === 'none') {
+        this.emojiPickerPopup.style.visibility = 'hidden';
+        this.emojiPickerPopup.style.display = 'block';
+
+        const positions = getPositions(emojiBtn);
+        const top = positions.top + 44;
+        let left = positions.left - 1;
+        if (left + this.emojiPickerPopup.scrollWidth > document.body.scrollWidth) {
+          left = document.body.scrollWidth - this.emojiPickerPopup.scrollWidth - 20;
+        }
+        this.emojiPickerPopup.style.top = `${top}px`;
+        this.emojiPickerPopup.style.left = `${left}px`;
+        this.emojiPickerPopup.style.visibility = 'visible';
+      } else {
+        this.emojiPickerPopup.style.display = 'none';
       }
+    }
+  }
+
+  hiddenEmojiPickerPopup = (e: any) => {
+    if (this.emojiPickerPopup && this.emojiPickerPopup.style.display !== 'none') {
+      if (
+        !isParentElement(e.target, this.emojiPickerPopup) &&
+        !(e.target.className === 'fa fa-smile-o' && e.target.title === 'emoji')
+      ) {
+        this.emojiPickerPopup.style.display = 'none';
+      }
+    }
+  };
+
+  triggerChange = (value: string) => {
+    const {onChange} = this.props;
+    if (onChange) {
+      this.setState({contentChanged: true});
+      onChange(value);
     }
   };
 
@@ -128,7 +209,6 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     if (this.simplemde) {
       const {codemirror} = this.simplemde;
       codemirror.off('change', this.handleChange);
-      this.upload && this.upload.removeEvents();
     }
   };
 
@@ -140,7 +220,50 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   createEditor = (): TSimpleMDE => {
-    const {value, options = {}, theme, onChange} = this.props;
+    const {value, options = {}, emoji} = this.props;
+
+    if (emoji && emoji.enabled && Array.isArray(options.toolbar) && options.toolbar.includes('emoji')) {
+      options.toolbar = options.toolbar.map(item => {
+        if (item === 'emoji') {
+          return {
+            name: 'emoji',
+            action: (e: any) => {
+              this.toggleEmojiPickerPopup(e.toolbarElements.emoji);
+            },
+            className: 'fa fa-smile-o',
+            title: 'emoji',
+          };
+        }
+        return item;
+      });
+
+      this.emojiPickerPopup = document.createElement('div');
+      this.emojiPickerPopup.id = 'emoji-picker-popup';
+      this.emojiPickerPopup.style.display = 'none';
+      this.emojiPickerPopup.style.position = 'absolute';
+      this.emojiPickerPopup.style.zIndex = '99999';
+
+      document.body.addEventListener(
+        'click',
+        this.hiddenEmojiPickerPopup,
+        false
+      );
+
+      document.body.appendChild(this.emojiPickerPopup);
+
+      const emojiPickerProps = {
+        emojiToolkit: {
+          sprites: true,
+          spriteSize: 32,
+        },
+        onSelect: this.handleEmojiSelect,
+        search: true,
+        recentCount: 36,
+        rowHeight: 40,
+      };
+
+      ReactDOM.render(<EmojiPicker {...emojiPickerProps} />, this.emojiPickerPopup)
+    }
 
     const simpleMdeOptions = ({
       ...options,
@@ -150,23 +273,54 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
     const simplemde = new SimpleMDE(simpleMdeOptions);
 
-    if (theme) {
-      simplemde.codemirror.setOption('theme', theme);
-    }
-
     // 同步自动保存的value
-    if (onChange) {
-      const {autosave} = options;
-      if (autosave && autosave.enabled === true && autosave.uniqueId) {
-        const autoSaveValue = simplemde.value();
-        if (autoSaveValue && autoSaveValue !== value) {
-          this.setState({contentChanged: true});
-          onChange(autoSaveValue);
-        }
+    const {autosave} = options;
+    if (autosave && autosave.enabled === true && autosave.uniqueId) {
+      const autoSaveValue = simplemde.value();
+      if (autoSaveValue && autoSaveValue !== value) {
+        this.triggerChange(autoSaveValue);
       }
     }
 
     return simplemde as TSimpleMDE;
+  };
+
+  initAutoCompleteEmoji() {
+    const {emoji} = this.props;
+
+    if (this.simplemde && emoji && emoji.autoComplete) {
+      emojiToolkit.sprites = true;
+      emojiToolkit.spriteSize = 32;
+
+      this.textcomplete = new Textcomplete(
+        new CodemirrorEditor(this.simplemde.codemirror),
+        {
+          dropdown: {
+            className: 'emoji-dropdown-menu',
+            maxCount: 5,
+          },
+        },
+      );
+
+      const shortnames = createShortnamesFromStrategy(strategy);
+
+      this.textcomplete.register([{
+        // Emoji strategy
+        match: /(\B):([\-+\w]*)$/,
+        search(term: string = '', callback: any) {
+          callback(shortnames.filter(shortname => shortname.startsWith(`:${term}`)));
+        },
+        replace(shortname: string) {
+          if (emoji.insertConvertTo === 'unicode') {
+            return emojiToolkit.shortnameToUnicode(shortname);
+          }
+          return shortname;
+        },
+        template(shortname: string) {
+          return `${emojiToolkit.toImage(shortname)} ${shortname.replace(/:/g, '')}`;
+        },
+      }]);
+    }
   };
 
   render() {

@@ -64,4 +64,5 @@ export default class Upload {
     onDrop: (instance: any, e: any) => void;
     removeEvents(): void;
     addEvents(): void;
+    destroy(): void;
 }
