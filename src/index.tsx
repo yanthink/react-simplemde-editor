@@ -2,21 +2,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
+import { each } from 'lodash';
 // @ts-ignore
-import {Textcomplete} from 'textcomplete';
+import escape from "escape-string-regexp";
+// @ts-ignore
+import { Textcomplete } from 'textcomplete';
 // @ts-ignore
 import CodemirrorEditor from 'textcomplete.codemirror';
 // @ts-ignore
 import EmojiPicker from 'yt-emoji-picker';
 // @ts-ignore
+import { EmojiType } from 'yt-emoji-picker/dist/uitls';
+// @ts-ignore
 import emojiToolkit from 'emoji-toolkit';
 // @ts-ignore
 import strategy from 'emoji-toolkit/emoji.json';
-import Upload, {Options as UploadOptions} from './plugins/Upload';
-import {createShortnamesFromStrategy, getPositions, isParentElement} from "./uitls";
+import Upload, { Options as UploadOptions } from './plugins/Upload';
+import { createEmojiDataFromStrategy, getPositions, isParentElement } from "./uitls";
 import 'simplemde/dist/simplemde.min.css';
 import 'yt-emoji-picker/dist/style.css';
-import 'emoji-assets/sprites/joypixels-sprite-32.min.css';
 import './emoji.css';
 import './style.less';
 
@@ -28,6 +32,12 @@ export interface SimpleMDEEditorProps {
     enabled: boolean;
     autoComplete: boolean;
     insertConvertTo: string;
+    emojiToolkit?: {
+      emojiSize?: number;
+      imagePathPNG?: string;
+      sprites?: boolean;
+      spriteSize?: number;
+    },
   };
   uploadOptions?: UploadOptions;
   getMdeInstance?: (simplemde: TSimpleMDE) => void;
@@ -76,7 +86,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
       this.addExtraKeys();
       this.getMdeInstance();
 
-      const {uploadOptions, emoji} = this.props;
+      const { uploadOptions, emoji } = this.props;
       if (uploadOptions) {
         this.upload = new Upload(this.simplemde.codemirror, uploadOptions);
       }
@@ -89,12 +99,12 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   componentWillReceiveProps(nextProps: SimpleMDEEditorProps) {
     if (this.simplemde) {
-      const {contentChanged} = this.state;
-      const {value} = nextProps;
+      const { contentChanged } = this.state;
+      const { value } = nextProps;
       if (!contentChanged && typeof value !== "undefined" && value !== this.simplemde.value()) {
         this.simplemde.value(value);
       }
-      this.setState({contentChanged: false});
+      this.setState({ contentChanged: false });
     }
   }
 
@@ -183,15 +193,15 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   triggerChange = (value: string) => {
-    const {onChange} = this.props;
+    const { onChange } = this.props;
     if (onChange) {
-      this.setState({contentChanged: true});
+      this.setState({ contentChanged: true });
       onChange(value);
     }
   };
 
   getMdeInstance = () => {
-    const {getMdeInstance} = this.props;
+    const { getMdeInstance } = this.props;
     if (getMdeInstance && this.simplemde) {
       getMdeInstance(this.simplemde);
     }
@@ -199,7 +209,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   addExtraKeys = () => {
     // https://codemirror.net/doc/manual.html#option_extraKeys
-    const {extraKeys} = this.props;
+    const { extraKeys } = this.props;
     if (extraKeys && this.simplemde) {
       this.simplemde.codemirror.setOption('extraKeys', extraKeys);
     }
@@ -207,20 +217,20 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
   removeEvents = () => {
     if (this.simplemde) {
-      const {codemirror} = this.simplemde;
+      const { codemirror } = this.simplemde;
       codemirror.off('change', this.handleChange);
     }
   };
 
   addEvents = () => {
     if (this.simplemde) {
-      const {codemirror} = this.simplemde;
+      const { codemirror } = this.simplemde;
       codemirror.on('change', this.handleChange);
     }
   };
 
   createEditor = (): TSimpleMDE => {
-    const {value, options = {}, emoji} = this.props;
+    const { value, options = {}, emoji } = this.props;
 
     if (emoji && emoji.enabled && Array.isArray(options.toolbar) && options.toolbar.includes('emoji')) {
       options.toolbar = options.toolbar.map(item => {
@@ -252,10 +262,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
       document.body.appendChild(this.emojiPickerPopup);
 
       const emojiPickerProps = {
-        emojiToolkit: {
-          sprites: true,
-          spriteSize: 32,
-        },
+        emojiToolkit: emoji.emojiToolkit,
         onSelect: this.handleEmojiSelect,
         search: true,
         recentCount: 36,
@@ -274,7 +281,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
     const simplemde = new SimpleMDE(simpleMdeOptions);
 
     // 同步自动保存的value
-    const {autosave} = options;
+    const { autosave } = options;
     if (autosave && autosave.enabled === true && autosave.uniqueId) {
       const autoSaveValue = simplemde.value();
       if (autoSaveValue && autoSaveValue !== value) {
@@ -286,11 +293,13 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   initAutoCompleteEmoji() {
-    const {emoji} = this.props;
+    const { emoji } = this.props;
 
     if (this.simplemde && emoji && emoji.autoComplete) {
-      emojiToolkit.sprites = true;
-      emojiToolkit.spriteSize = 32;
+      each(emoji.emojiToolkit, (value, key) => {
+        // @ts-ignore
+        emojiToolkit[key] = value;
+      });
 
       this.textcomplete = new Textcomplete(
         new CodemirrorEditor(this.simplemde.codemirror),
@@ -302,29 +311,34 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
         },
       );
 
-      const shortnames = createShortnamesFromStrategy(strategy);
+      const emojiData = createEmojiDataFromStrategy(strategy);
 
       this.textcomplete.register([{
         // Emoji strategy
         match: /(\B):([\-+\w]*)$/,
         search(term: string = '', callback: any) {
-          callback(shortnames.filter(shortname => shortname.startsWith(`:${term}`)));
+          const emojis = emojiData.filter((emoji: EmojiType) => {
+            const searchTermRegExp = new RegExp(`^(?:.* +)*${escape(term)}`, "i");
+            return emoji.keywords.some((keyword: string) => searchTermRegExp.test(keyword));
+          });
+
+          callback(emojis);
         },
-        replace(shortname: string) {
+        replace(item: EmojiType) {
           if (emoji.insertConvertTo === 'unicode') {
-            return emojiToolkit.shortnameToUnicode(shortname);
+            return emojiToolkit.shortnameToUnicode(item.shortname);
           }
-          return shortname;
+          return item.shortname;
         },
-        template(shortname: string) {
-          return `${emojiToolkit.toImage(shortname)} ${shortname.replace(/:/g, '')}`;
+        template(item: EmojiType) {
+          return `${emojiToolkit.toImage(item.shortname)} ${item.shortname.replace(/:/g, '')}`;
         },
       }]);
     }
   };
 
   render() {
-    const {className, label} = this.props;
+    const { className, label } = this.props;
     return (
       <div id={this.wrapperId} className={className}>
         {label && <label htmlFor={this.id}>{label}</label>}

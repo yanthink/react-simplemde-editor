@@ -21,7 +21,7 @@
   cursor: pointer;
   box-sizing: border-box;
   vertical-align: middle;
-  font-size: 14;
+  font-size: 14px;
 }
 
 .emoji-dropdown-menu > li.textcomplete-item.active,
@@ -48,7 +48,7 @@
   height: 40px;
 }
 
-.emoji-dialog .emoji .joypixels {
+.emoji-dialog .emoji span.joypixels {
   transform-origin: left;
   transform: scale(0.75, 0.75);
   margin: 0;

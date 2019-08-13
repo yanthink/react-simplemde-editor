@@ -76,6 +76,8 @@ npm start
 | 参数 | 说明 | 类型 | 默认值	 |
 | --- | --- | --- | --- |
 | enabled | 是否开启 | boolean | false |
-| autoComplete | 是否开启 shortname 自动补全 | boolean | false |
+| autoComplete | 是否开启 [shortname](https://www.einsition.com/tools/emoji-cheat-sheet) 自动补全 | boolean | false |
 | insertConvertTo | 插值转换，可选值 `shortname`，`unicode` | string | shortname |
+| emojiToolkit | [emoji-toolkit配置](https://github.com/joypixels/emoji-toolkit/blob/master/USAGE.md) | object |  - |
+
 

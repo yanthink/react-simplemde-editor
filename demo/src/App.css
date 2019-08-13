@@ -3,7 +3,7 @@
   margin: 40px auto 0;
 }
 
-.joypixels {
+span.joypixels {
   transform-origin: left;
   transform: scale(0.75, 0.75);
   margin: 0;

@@ -31,8 +31,10 @@ loadLanguages([
   'yaml',
 ]);
 
-emojiToolkit.sprites = true;
-emojiToolkit.spriteSize = 32;
+const emojiToolkitConfig = {
+  sprites: true,
+  spriteSize: 32,
+};
 
 class App extends PureComponent {
   state = {
@@ -40,13 +42,18 @@ class App extends PureComponent {
   };
 
   renderMarkdown = text => {
-    let html = marked(text, {breaks: true});
+    let html = marked(text, { breaks: true });
     if (/language-/.test(html)) {
       const container = document.createElement('div');
       container.innerHTML = html;
       Prism.highlightAllUnder(container);
       html = container.innerHTML;
     }
+
+    Object.keys(emojiToolkitConfig).forEach(key => {
+      emojiToolkit[key] = emojiToolkitConfig[key];
+    });
+
     return emojiToolkit.toImage(html);
   };
 
@@ -126,6 +133,7 @@ class App extends PureComponent {
         enabled: true,
         autoComplete: true,
         insertConvertTo: 'unicode', // 'shortname' or 'unicode'
+        emojiToolkit: emojiToolkitConfig,
       },
     };
 
