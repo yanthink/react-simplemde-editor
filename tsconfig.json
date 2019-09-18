@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es6","dom","es2017"],
+    "lib": ["es2018", "dom"],
     "module": "es6", // 使用 ES2015 模块
     "target": "es6", // 编译成 ES2015 (Babel 将做剩下的事情)
     "declaration": true, // 生成 `.d.ts` 文件

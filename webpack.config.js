@@ -9,12 +9,16 @@ module.exports = {
   // devtool: 'eval',
   mode: "production",
   // 我们应用的入口, 在 `src` 目录 (我们添加到下面的 resolve.modules):
-  entry: 'index.tsx',
+  entry: {
+    index: 'index.tsx',
+    emoji: 'emoji.ts',
+  },
   // 配置 devServer 的输出目录和 publicPath
   output: {
-    filename: 'index.js',
-    publicPath: 'public',
     path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    // chunkFilename: '[name].async.js',
+    // publicPath: './dist/',
     libraryTarget: 'commonjs2',
   },
   // 告诉 Webpack 加载 TypeScript 文件
@@ -61,8 +65,22 @@ module.exports = {
       },
     ]
   },
-  externals: [nodeExternals()],
+  externals: [nodeExternals({
+    // whitelist: [/emoji-toolkit/],
+  })],
   optimization: {
+    // splitChunks: {
+    //   cacheGroups: {
+    //     emoji: {
+    //       test: /emoji-toolkit/,
+    //       name: 'emoji',
+    //       chunks: 'async',
+    //       minChunks: 1,
+    //       reuseExistingChunk: true,
+    //       enforce: true,
+    //     },
+    //   },
+    // },
     minimizer: [
       new UglifyJsPlugin(),
       new OptimizeCSSAssetsPlugin(),

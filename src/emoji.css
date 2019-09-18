@@ -12,9 +12,8 @@
 }
 
 .emoji-dropdown-menu li a {
-  display: block;
-  height: 41px;
-  line-height: 24px;
+  display: flex;
+  align-items: center;
   padding: 8px 12px;
   color: #777;
   border-bottom: 1px solid #e6e6e6;
@@ -39,7 +38,6 @@
 .emoji-dropdown-menu li .joypixels {
   transform-origin: left;
   transform: scale(0.75, 0.75);
-  float: left;
 }
 
 /* emoji-picker */

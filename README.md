@@ -22,7 +22,7 @@ npm install -S yt-simplemde-editor
 
 ### 使用
 
-您可以在 [demo](demo/src/App.js) 中查看基本用法。
+您可以在 [demo](demo/src/pages/index.js) 中查看基本用法。
 
 ### Demo
 
@@ -54,7 +54,6 @@ npm start
 | onChange | 内容发生改变时触发 | value => void | - |
 | options | [SimpleMDE选项](https://github.com/sparksuite/simplemde-markdown-editor#configuration) | object | - |
 | emoji | emoji参数 | [Emoji](#Emoji) | - |
-
 
 ### UploadOptions
 | 参数 | 说明 | 类型 | 默认值	 |

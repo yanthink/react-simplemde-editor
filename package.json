@@ -1,8 +1,11 @@
 {
   "name": "yt-simplemde-editor",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "React SimpleMDE Markdown Editor",
   "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,22 +16,23 @@
   },
   "keywords": [
     "react",
+    "markdown",
+    "markdown-editor",
     "simplemde-editor",
-    "markdown"
+    "emoji"
   ],
   "author": "yanthink",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/preset-react": "^7.0.0",
     "@types/codemirror": "0.0.76",
     "@types/lodash": "^4.14.136",
     "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/simplemde": "^1.11.7",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
+    "babel-loader": "^8.0.6",
     "css-loader": "^3.0.0",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
@@ -51,6 +55,6 @@
     "simplemde": "^1.11.2",
     "textcomplete": "^0.17.1",
     "textcomplete.codemirror": "^0.2.1",
-    "yt-emoji-picker": "^1.0.2"
+    "yt-emoji-picker": "^1.1.0"
   }
 }

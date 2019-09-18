@@ -3,25 +3,10 @@ import ReactDOM from 'react-dom';
 import SimpleMDE from 'simplemde';
 import CodeMirror from 'codemirror';
 import { each } from 'lodash';
-// @ts-ignore
-import escape from "escape-string-regexp";
-// @ts-ignore
-import { Textcomplete } from 'textcomplete';
-// @ts-ignore
-import CodemirrorEditor from 'textcomplete.codemirror';
-// @ts-ignore
-import EmojiPicker from 'yt-emoji-picker';
-// @ts-ignore
-import { EmojiType } from 'yt-emoji-picker/dist/uitls';
-// @ts-ignore
-import emojiToolkit from 'emoji-toolkit';
-// @ts-ignore
-import strategy from 'emoji-toolkit/emoji.json';
 import Upload, { Options as UploadOptions } from './plugins/Upload';
-import { createEmojiDataFromStrategy, getPositions, isParentElement } from "./uitls";
+import { getPositions, isParentElement } from "./utils";
 import 'simplemde/dist/simplemde.min.css';
 import 'yt-emoji-picker/dist/style.css';
-import './emoji.css';
 import './style.less';
 
 export interface SimpleMDEEditorProps {
@@ -44,7 +29,14 @@ export interface SimpleMDEEditorProps {
   extraKeys?: CodeMirror.KeyMap;
   value?: string;
   onChange?: (value: string) => void;
-  options?: SimpleMDE.Options,
+  options?: SimpleMDE.Options;
+
+  emojiToolkit?: any;
+  emojiData: string[];
+  EmojiPicker: any;
+  escape?: any;
+  Textcomplete?: any;
+  CodemirrorEditor?: any;
 }
 
 export interface SimpleMDEEditorState {
@@ -151,9 +143,9 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   handleEmojiSelect = (emoji: any, e: any) => {
-    if (this.simplemde && this.props.emoji) {
+    if (this.simplemde && this.props.emoji && this.props.emojiToolkit) {
       const value = this.props.emoji.insertConvertTo === 'unicode'
-        ? emojiToolkit.shortnameToUnicode(emoji.shortname)
+        ? this.props.emojiToolkit.shortnameToUnicode(emoji.shortname)
         : emoji.shortname;
 
       this.simplemde.codemirror.replaceSelection(value);
@@ -230,46 +222,55 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   createEditor = (): TSimpleMDE => {
-    const { value, options = {}, emoji } = this.props;
+    const { value, options = {}, emoji, EmojiPicker, emojiToolkit } = this.props;
 
-    if (emoji && emoji.enabled && Array.isArray(options.toolbar) && options.toolbar.includes('emoji')) {
-      options.toolbar = options.toolbar.map(item => {
-        if (item === 'emoji') {
-          return {
-            name: 'emoji',
-            action: (e: any) => {
-              this.toggleEmojiPickerPopup(e.toolbarElements.emoji);
-            },
-            className: 'fa fa-smile-o',
-            title: 'emoji',
-          };
-        }
-        return item;
-      });
+    if (
+      emoji &&
+      emoji.enabled &&
+      Array.isArray(options.toolbar) &&
+      options.toolbar.includes('emoji')
+    ) {
+      if (!EmojiPicker || !emojiToolkit) {
+        console.error('使用emojiPicker必须提供EmojiPicker和emojiToolkit属性，基本用法详见：https://github.com/yanthink/react-simplemde-editor/blob/master/demo/src/pages/index.js');
+      } else {
+        options.toolbar = options.toolbar.map(item => {
+          if (item === 'emoji') {
+            return {
+              name: 'emoji',
+              action: (e: any) => {
+                this.toggleEmojiPickerPopup(e.toolbarElements.emoji);
+              },
+              className: 'fa fa-smile-o',
+              title: 'emoji',
+            };
+          }
+          return item;
+        });
 
-      this.emojiPickerPopup = document.createElement('div');
-      this.emojiPickerPopup.id = 'emoji-picker-popup';
-      this.emojiPickerPopup.style.display = 'none';
-      this.emojiPickerPopup.style.position = 'absolute';
-      this.emojiPickerPopup.style.zIndex = '99999';
+        this.emojiPickerPopup = document.createElement('div');
+        this.emojiPickerPopup.id = 'emoji-picker-popup';
+        this.emojiPickerPopup.style.display = 'none';
+        this.emojiPickerPopup.style.position = 'absolute';
+        this.emojiPickerPopup.style.zIndex = '99999';
 
-      document.body.addEventListener(
-        'click',
-        this.hiddenEmojiPickerPopup,
-        false
-      );
+        document.body.addEventListener(
+          'click',
+          this.hiddenEmojiPickerPopup,
+          false
+        );
 
-      document.body.appendChild(this.emojiPickerPopup);
+        document.body.appendChild(this.emojiPickerPopup);
 
-      const emojiPickerProps = {
-        emojiToolkit: emoji.emojiToolkit,
-        onSelect: this.handleEmojiSelect,
-        search: true,
-        recentCount: 36,
-        rowHeight: 40,
-      };
+        const emojiPickerProps = {
+          emojiToolkit: emoji.emojiToolkit,
+          onSelect: this.handleEmojiSelect,
+          search: true,
+          recentCount: 36,
+          rowHeight: 40,
+        };
 
-      ReactDOM.render(<EmojiPicker {...emojiPickerProps} />, this.emojiPickerPopup)
+        ReactDOM.render(<EmojiPicker {...emojiPickerProps} />, this.emojiPickerPopup);
+      }
     }
 
     const simpleMdeOptions = ({
@@ -293,13 +294,16 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
   };
 
   initAutoCompleteEmoji() {
-    const { emoji } = this.props;
+    const { emoji, emojiToolkit, emojiData, Textcomplete, CodemirrorEditor, escape } = this.props;
 
-    if (this.simplemde && emoji && emoji.autoComplete) {
-      each(emoji.emojiToolkit, (value, key) => {
-        // @ts-ignore
-        emojiToolkit[key] = value;
-      });
+    if (
+      this.simplemde &&
+      emoji && emoji.autoComplete
+    ) {
+      if (!emojiToolkit || !emojiData || !Textcomplete || !CodemirrorEditor || !escape) {
+        console.error('开启emoji自动补全必须提供emojiToolkit、emojiData、Textcomplete、CodemirrorEditor和escape属性，基本用法详见：https://github.com/yanthink/react-simplemde-editor/blob/master/demo/src/pages/index.js');
+        return;
+      }
 
       this.textcomplete = new Textcomplete(
         new CodemirrorEditor(this.simplemde.codemirror),
@@ -311,27 +315,38 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
         },
       );
 
-      const emojiData = createEmojiDataFromStrategy(strategy);
-
       this.textcomplete.register([{
         // Emoji strategy
         match: /(\B):([\-+\w]*)$/,
         search(term: string = '', callback: any) {
-          const emojis = emojiData.filter((emoji: EmojiType) => {
-            const searchTermRegExp = new RegExp(`^(?:.* +)*${escape(term)}`, "i");
+          const emojis = emojiData.filter((emoji: any) => {
+            const searchTermRegExp = new RegExp(`^(?:.* +)*${escape(term)}`, 'i');
             return emoji.keywords.some((keyword: string) => searchTermRegExp.test(keyword));
           });
 
           callback(emojis);
         },
-        replace(item: EmojiType) {
+        replace(item: any) {
           if (emoji.insertConvertTo === 'unicode') {
             return emojiToolkit.shortnameToUnicode(item.shortname);
           }
           return item.shortname;
         },
-        template(item: EmojiType) {
-          return `${emojiToolkit.toImage(item.shortname)} ${item.shortname.replace(/:/g, '')}`;
+        template(item: any) {
+          const emojiToolkitOptionsBak: any = {};
+
+          each(emoji.emojiToolkit, (value, key) => {
+            emojiToolkitOptionsBak[key] = emojiToolkit[key];
+            emojiToolkit[key] = value;
+          });
+
+          const text = `${emojiToolkit.toImage(item.shortname)} ${item.shortname.replace(/:/g, '')}`;
+
+          each(emojiToolkitOptionsBak, (value, key) => {
+            emojiToolkit[key] = value;
+          });
+
+          return text;
         },
       }]);
     }
