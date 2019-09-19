@@ -29,6 +29,17 @@ marked.setOptions({
   headerIds: false,
   gfm: true,
   breaks: true,
+  highlight (code, lang) {
+    if (lang) {
+      const language = lang.toLowerCase();
+      const grammar = Prism.languages[language];
+      if (grammar) {
+        return Prism.highlight(code, grammar, language);
+      }
+    }
+
+    return code;
+  }
 });
 
 @Form.create()
@@ -49,13 +60,6 @@ class Demo extends React.Component {
 
   renderMarkdown = text => {
     let html = marked(text);
-    if (/language-/.test(html)) {
-      const container = document.createElement('div');
-      container.innerHTML = html;
-      Prism.highlightAllUnder(container);
-      html = container.innerHTML;
-    }
-
     return emojiToolkit.toImage(html);
   };
 
