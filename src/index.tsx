@@ -17,6 +17,7 @@ export interface SimpleMDEEditorProps {
     enabled: boolean;
     autoComplete: boolean;
     insertConvertTo: string;
+    categories?: object;
     emojiToolkit?: {
       emojiSize?: number;
       imagePathPNG?: string;
@@ -263,6 +264,7 @@ class SimpleMDEEditor extends React.Component<SimpleMDEEditorProps, SimpleMDEEdi
 
         const emojiPickerProps = {
           emojiToolkit: emoji.emojiToolkit,
+          categories: emoji.categories,
           onSelect: this.handleEmojiSelect,
           search: true,
           recentCount: 36,

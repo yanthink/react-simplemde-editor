@@ -78,5 +78,47 @@ npm start
 | autoComplete | 是否开启 [shortname](https://www.einsition.com/tools/emoji-cheat-sheet) 自动补全 | boolean | false |
 | insertConvertTo | 插值转换，可选值 `shortname`，`unicode` | string | shortname |
 | emojiToolkit | [emoji-toolkit配置](https://github.com/joypixels/emoji-toolkit/blob/master/USAGE.md) | object |  - |
+| categories | [类别设置](https://github.com/yanthink/react-emoji-picker#api) | { [key: string]: { title: string; emoji: string; } } | [defaultCategories](#defaultCategories) |
 
 
+### defaultCategories
+```json
+const defaultCategories: CategoriesType = {
+  recent: {
+    title: '常用',
+    emoji: 'clock3',
+  },
+  people: {
+    title: '表情符号与人物',
+    emoji: 'smile',
+  },
+  nature: {
+    title: '动物与自然',
+    emoji: 'hamster',
+  },
+  food: {
+    title: '食物与饮料',
+    emoji: 'pizza',
+  },
+  activity: {
+    title: '活动',
+    emoji: 'soccer',
+  },
+  travel: {
+    title: '旅行与地点',
+    emoji: 'earth_americas',
+  },
+  objects: {
+    title: '物体',
+    emoji: 'bulb',
+  },
+  symbols: {
+    title: '符号',
+    emoji: 'symbols',
+  },
+  flags: {
+    title: '旗帜',
+    emoji: 'flag_cn',
+  },
+};
+```

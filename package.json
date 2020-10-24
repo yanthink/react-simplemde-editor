@@ -1,6 +1,6 @@
 {
   "name": "yt-simplemde-editor",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "React SimpleMDE Markdown Editor",
   "main": "dist/index.js",
   "files": [
@@ -54,7 +54,6 @@
     "react-dom": "^16.8.6",
     "simplemde": "^1.11.2",
     "textcomplete": "^0.17.1",
-    "textcomplete.codemirror": "^0.2.1",
-    "yt-emoji-picker": "^1.1.0"
+    "textcomplete.codemirror": "^0.2.1"
   }
 }
